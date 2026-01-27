@@ -1,12 +1,6 @@
 import json
-import re
 
-def extract_json(text: str) -> dict:
-    match = re.search(r"\{.*\}", text, re.DOTALL)
-    if not match:
-        raise ValueError("No JSON object found in LLM output")
-    return json.loads(match.group(0))
-
+from llm_json_utils import extract_json
 
 def generate_pytest_from_cp(json_text: str, source_file: str) -> str:
     data = extract_json(json_text)

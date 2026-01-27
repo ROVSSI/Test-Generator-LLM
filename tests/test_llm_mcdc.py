@@ -8,17 +8,17 @@ target_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(target_module)
 
 def test_add_tc1():
-    result = target_module.add(2, 3)
+    result = target_module.add(1, 2)
     assert result is not None
 
 def test_add_tc2():
-    result = target_module.add(2.5, 3.5)
+    result = target_module.add(0, 0)
     assert result is not None
 
 def test_add_tc3():
-    result = target_module.add(2, 3.5)
+    result = target_module.add(-1, 2)
     assert result is not None
 
 def test_add_tc4():
-    result = target_module.add(3.5, 2)
+    result = target_module.add(1, -2)
     assert result is not None
