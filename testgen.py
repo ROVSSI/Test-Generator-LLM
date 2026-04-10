@@ -10,8 +10,10 @@ sys.path.append(SRC_DIR)
 
 from llm_client import call_llm
 from llm_prompts import CATEGORY_PARTITION_PROMPT, MCDC_PROMPT
-from llm_test_generator import generate_pytest_from_cp
-from llm_mcdc_generator import generate_pytest_from_mcdc
+from llm_json_utils import extract_json
+from llm_mcdc_generator import render_pytest_from_mcdc
+from llm_test_generator import render_pytest_from_cp
+from llm_validation import format_validation_summary, validate_test_spec
 
 
 def main() -> int:
@@ -55,10 +57,9 @@ def main() -> int:
                     function_code=function_code
                 )
                 llm_output = call_llm(prompt)
-                test_code = generate_pytest_from_cp(
-                    llm_output,
-                    source_file
-                )
+                test_spec = extract_json(llm_output)
+                validated_spec, validation_summary = validate_test_spec(test_spec, args.filepath)
+                test_code = render_pytest_from_cp(validated_spec, source_file)
                 out_file = "test_llm_category_partition.py"
 
             # ------------------------------
@@ -70,10 +71,9 @@ def main() -> int:
                     function_code=function_code
                 )
                 llm_output = call_llm(prompt)
-                test_code = generate_pytest_from_mcdc(
-                    llm_output,
-                    source_file
-                )
+                test_spec = extract_json(llm_output)
+                validated_spec, validation_summary = validate_test_spec(test_spec, args.filepath)
+                test_code = render_pytest_from_mcdc(validated_spec, source_file)
                 out_file = "test_llm_mcdc.py"
 
             # Write output
@@ -87,6 +87,8 @@ def main() -> int:
             print(f"[ERROR] {exc}", file=sys.stderr)
             return 1
 
+        for line in format_validation_summary(validation_summary):
+            print(line)
         print(f"[OK] LLM-based tests written to {out_path}")
         print(f"Run with: pytest -v tests/{out_file}")
         return 0

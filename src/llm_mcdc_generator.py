@@ -3,9 +3,11 @@ from llm_codegen_utils import append_test_body, build_call_arguments, build_modu
 
 
 def generate_pytest_from_mcdc(json_text: str, source_file: str) -> str:
-    data = extract_json(json_text)
-    function_name = data["function"]
+    return render_pytest_from_mcdc(extract_json(json_text), source_file)
 
+
+def render_pytest_from_mcdc(data: dict, source_file: str) -> str:
+    function_name = data["function"]
     lines = build_module_loader_lines(source_file)
     seen_names: dict[str, int] = {}
 

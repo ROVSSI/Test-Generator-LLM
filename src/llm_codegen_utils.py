@@ -1,4 +1,5 @@
 import re
+import builtins
 from typing import Any
 
 
@@ -39,7 +40,7 @@ def append_test_body(lines: list[str], function_name: str, call_arguments: str, 
 
     if expected_behavior == "exception":
         exception_name = test_case.get("expected_exception") or "Exception"
-        lines.append(f"    with pytest.raises({exception_name}):")
+        lines.append(f"    with pytest.raises({_build_exception_reference(exception_name)}):")
         lines.append(f"        target_module.{function_name}({call_arguments})")
         return
 
@@ -60,3 +61,17 @@ def append_test_body(lines: list[str], function_name: str, call_arguments: str, 
 def _sanitize_identifier(value: str) -> str:
     sanitized = re.sub(r"\W|^(?=\d)", "_", str(value).strip().lower())
     return sanitized or "generated"
+
+
+def _build_exception_reference(exception_name: str) -> str:
+    if not isinstance(exception_name, str) or not exception_name:
+        return "Exception"
+
+    if "." in exception_name:
+        return exception_name
+
+    builtin_exception = getattr(builtins, exception_name, None)
+    if isinstance(builtin_exception, type) and issubclass(builtin_exception, BaseException):
+        return exception_name
+
+    return f"target_module.{exception_name}"

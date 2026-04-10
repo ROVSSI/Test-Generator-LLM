@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 
 ROOT_DIR = os.path.join(os.path.dirname(__file__), "..")
 SRC_DIR = os.path.join(ROOT_DIR, "src")
@@ -9,6 +10,7 @@ sys.path.append(SRC_DIR)
 from llm_json_utils import extract_json
 from llm_mcdc_generator import generate_pytest_from_mcdc
 from llm_test_generator import generate_pytest_from_cp
+import testgen
 from testgen import main
 
 
@@ -105,3 +107,57 @@ def test_main_returns_nonzero_for_missing_file(monkeypatch, capsys):
 
     assert exit_code == 1
     assert "[ERROR] File not found: does-not-exist.py" in captured.err
+
+
+def test_main_repairs_invalid_llm_expectations_before_writing_pytest(monkeypatch, capsys, tmp_path):
+    llm_output = json.dumps(
+        {
+            "function": "route_order",
+            "decisions": [
+                {
+                    "decision": "manual review boundary",
+                    "conditions": ["destination == 'domestic'", "order_total < 20"],
+                    "test_cases": [
+                        {
+                            "id": "TC2",
+                            "inputs": {
+                                "order_total": 0,
+                                "customer_tier": "standard",
+                                "is_express": False,
+                                "has_coupon": False,
+                                "destination": "domestic",
+                            },
+                            "expected_behavior": "normal",
+                            "expected_return": "standard",
+                            "expected_exception": None,
+                        }
+                    ],
+                }
+            ],
+        }
+    )
+
+    output_root = tmp_path / "project"
+    output_root.mkdir()
+    monkeypatch.setattr(testgen, "PROJECT_ROOT", str(output_root))
+    monkeypatch.setattr(testgen, "call_llm", lambda prompt: llm_output)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "testgen.py",
+            "llm",
+            "--method",
+            "mcdc",
+            os.path.join(ROOT_DIR, "src", "order_routing_code.py"),
+        ],
+    )
+
+    exit_code = main()
+    captured = capsys.readouterr()
+    output_path = output_root / "tests" / "test_llm_mcdc.py"
+    generated = output_path.read_text(encoding="utf-8")
+
+    assert exit_code == 0
+    assert "1 repaired" in captured.out
+    assert "assert result == 'manual_review'" in generated

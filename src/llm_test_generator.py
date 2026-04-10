@@ -2,10 +2,11 @@ from llm_json_utils import extract_json
 from llm_codegen_utils import append_test_body, build_call_arguments, build_module_loader_lines, build_test_name
 
 def generate_pytest_from_cp(json_text: str, source_file: str) -> str:
-    data = extract_json(json_text)
+    return render_pytest_from_cp(extract_json(json_text), source_file)
 
+
+def render_pytest_from_cp(data: dict, source_file: str) -> str:
     function_name = data["function"]
-
     lines = build_module_loader_lines(source_file)
     seen_names: dict[str, int] = {}
 

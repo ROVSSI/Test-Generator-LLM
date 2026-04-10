@@ -29,3 +29,8 @@ Set your API key before using the CLI:
 export OPENAI_API_KEY="your-api-key"
 python testgen.py llm --method category_partition src/complex_code.py
 ```
+
+The CLI now validates every LLM-generated test case by executing the target
+function before writing pytest. If the model proposes the wrong expected
+return value or misses an exception, the tool repairs the case and prints a
+validation summary.
