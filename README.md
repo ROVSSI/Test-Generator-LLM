@@ -7,16 +7,25 @@ For Phase 1 we verify the environment using a tiny sample function and a basic p
 
 ```bash
 # 1) Create venv (recommended)
-python -m venv .venv
+python3 -m venv .venv
 # Windows: .venv\Scripts\activate
 # macOS/Linux:
 source .venv/bin/activate
 
 # 2) Install dependencies
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 
 # 3) Run tests
-pytest -v
+python -m pytest -q
 ```
 
-You should see `1 passed`.
+You should see the full repository test suite pass.
+
+## LLM-Based Test Generation
+
+Set your API key before using the CLI:
+
+```bash
+export OPENAI_API_KEY="your-api-key"
+python testgen.py llm --method category_partition src/complex_code.py
+```

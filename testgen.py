@@ -14,7 +14,7 @@ from llm_test_generator import generate_pytest_from_cp
 from llm_mcdc_generator import generate_pytest_from_mcdc
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="LLM-Guided Test Generator"
     )
@@ -36,56 +36,63 @@ def main():
 
     if args.command == "llm":
         if not os.path.exists(args.filepath):
-            print(f"[ERROR] File not found: {args.filepath}")
-            return
+            print(f"[ERROR] File not found: {args.filepath}", file=sys.stderr)
+            return 1
 
-        # Read source code
-        with open(args.filepath, "r", encoding="utf-8") as f:
-            function_code = f.read()
+        try:
+            # Read source code
+            with open(args.filepath, "r", encoding="utf-8") as f:
+                function_code = f.read()
 
-        source_file = os.path.basename(args.filepath)
+            source_file = os.path.basename(args.filepath)
 
-        # ------------------------------
-        # CATEGORY PARTITION
-        # ------------------------------
-        if args.method == "category_partition":
-            print("[INFO] Calling LLM with Category Partition prompt...")
-            prompt = CATEGORY_PARTITION_PROMPT.format(
-                function_code=function_code
-            )
-            llm_output = call_llm(prompt)
-            test_code = generate_pytest_from_cp(
-                llm_output,
-                source_file
-            )
-            out_file = "test_llm_category_partition.py"
+            # ------------------------------
+            # CATEGORY PARTITION
+            # ------------------------------
+            if args.method == "category_partition":
+                print("[INFO] Calling LLM with Category Partition prompt...")
+                prompt = CATEGORY_PARTITION_PROMPT.format(
+                    function_code=function_code
+                )
+                llm_output = call_llm(prompt)
+                test_code = generate_pytest_from_cp(
+                    llm_output,
+                    source_file
+                )
+                out_file = "test_llm_category_partition.py"
 
-        # ------------------------------
-        # MC/DC
-        # ------------------------------
-        elif args.method == "mcdc":
-            print("[INFO] Calling LLM with MC/DC prompt...")
-            prompt = MCDC_PROMPT.format(
-                function_code=function_code
-            )
-            llm_output = call_llm(prompt)
-            test_code = generate_pytest_from_mcdc(
-                llm_output,
-                source_file
-            )
-            out_file = "test_llm_mcdc.py"
+            # ------------------------------
+            # MC/DC
+            # ------------------------------
+            elif args.method == "mcdc":
+                print("[INFO] Calling LLM with MC/DC prompt...")
+                prompt = MCDC_PROMPT.format(
+                    function_code=function_code
+                )
+                llm_output = call_llm(prompt)
+                test_code = generate_pytest_from_mcdc(
+                    llm_output,
+                    source_file
+                )
+                out_file = "test_llm_mcdc.py"
 
-        # Write output
-        tests_dir = os.path.join(PROJECT_ROOT, "tests")
-        os.makedirs(tests_dir, exist_ok=True)
+            # Write output
+            tests_dir = os.path.join(PROJECT_ROOT, "tests")
+            os.makedirs(tests_dir, exist_ok=True)
 
-        out_path = os.path.join(tests_dir, out_file)
-        with open(out_path, "w", encoding="utf-8") as f:
-            f.write(test_code)
+            out_path = os.path.join(tests_dir, out_file)
+            with open(out_path, "w", encoding="utf-8") as f:
+                f.write(test_code)
+        except Exception as exc:
+            print(f"[ERROR] {exc}", file=sys.stderr)
+            return 1
 
         print(f"[OK] LLM-based tests written to {out_path}")
         print(f"Run with: pytest -v tests/{out_file}")
+        return 0
+
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

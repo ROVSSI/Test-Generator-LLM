@@ -3,11 +3,19 @@ You are a software testing expert.
 
 Apply the CATEGORY PARTITION testing technique.
 
+IMPORTANT RULES:
+- Output ONLY raw JSON.
+- Do NOT include explanations.
+- Do NOT use markdown.
+- Do NOT include backticks.
+- For normal cases, include the exact return value in `expected_return` and set `expected_exception` to null.
+- For exception cases, set `expected_return` to null and `expected_exception` to the built-in exception class name.
+
 Return ONLY valid JSON following this structure:
 {{
   "function": "...",
   "parameters": {{
-    "param": {{
+    "parameter_name": {{
       "categories": {{
         "category": ["choice"]
       }}
@@ -18,8 +26,10 @@ Return ONLY valid JSON following this structure:
     {{
       "id": "TC1",
       "description": "...",
-      "inputs": {{"param": "choice"}},
-      "expected_behavior": "normal | exception"
+      "inputs": {{"parameter_name": "concrete argument value"}},
+      "expected_behavior": "normal | exception",
+      "expected_return": "exact return value or null",
+      "expected_exception": "ValueError or null"
     }}
   ]
 }}
@@ -40,6 +50,8 @@ IMPORTANT RULES:
 - Do NOT use markdown.
 - Do NOT include backticks.
 - Do NOT include any text before or after JSON.
+- For normal cases, include the exact return value in `expected_return` and set `expected_exception` to null.
+- For exception cases, set `expected_return` to null and `expected_exception` to the built-in exception class name.
 
 Return JSON in exactly this format:
 
@@ -52,8 +64,10 @@ Return JSON in exactly this format:
       "test_cases": [
         {{
           "id": "TC1",
-          "inputs": {{"param": [values]}},
-          "expected_behavior": "normal"
+          "inputs": {{"parameter_name": "concrete argument value"}},
+          "expected_behavior": "normal | exception",
+          "expected_return": "exact return value or null",
+          "expected_exception": "ValueError or null"
         }}
       ]
     }}

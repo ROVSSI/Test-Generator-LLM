@@ -2,13 +2,20 @@ import json
 
 def extract_json(text: str) -> dict:
     """
-    Robustly extract the first JSON object from LLM output.
+    Extract first JSON object from LLM output.
     """
-    start = text.find("{")
-    end = text.rfind("}")
+    decoder = json.JSONDecoder()
 
-    if start == -1 or end == -1 or end <= start:
-        raise ValueError("No valid JSON object found in LLM output")
+    for index, char in enumerate(text):
+        if char != "{":
+            continue
 
-    json_str = text[start:end + 1]
-    return json.loads(json_str)
+        try:
+            parsed, _ = decoder.raw_decode(text[index:])
+        except json.JSONDecodeError:
+            continue
+
+        if isinstance(parsed, dict):
+            return parsed
+
+    raise ValueError("No JSON object found in LLM output")

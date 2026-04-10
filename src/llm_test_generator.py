@@ -1,41 +1,19 @@
-import json
-
 from llm_json_utils import extract_json
+from llm_codegen_utils import append_test_body, build_call_arguments, build_module_loader_lines, build_test_name
 
 def generate_pytest_from_cp(json_text: str, source_file: str) -> str:
     data = extract_json(json_text)
 
-    function_name = data["function"]          # ← FIX
-    module_filename = source_file             # e.g. sample_code.py
+    function_name = data["function"]
 
-    lines = []
-    lines.append("import pytest")
-    lines.append("import os, importlib.util")
-    lines.append("")
-    lines.append("BASE_DIR = os.path.dirname(__file__)")
-    lines.append(
-        f"TARGET_PATH = os.path.join(BASE_DIR, '..', 'src', '{module_filename}')"
-    )
-    lines.append(
-        "spec = importlib.util.spec_from_file_location('target_module', TARGET_PATH)"
-    )
-    lines.append("target_module = importlib.util.module_from_spec(spec)")
-    lines.append("spec.loader.exec_module(target_module)")
-    lines.append("")
+    lines = build_module_loader_lines(source_file)
+    seen_names: dict[str, int] = {}
 
     for tc in data["test_cases"]:
-        test_name = f"test_{function_name}_{tc['id'].lower()}"
+        test_name = build_test_name(function_name, tc["id"], seen_names)
         lines.append(f"def {test_name}():")
-
-        args = ", ".join(repr(v) for v in tc["inputs"]["param"])
-
-        if tc["expected_behavior"] == "exception":
-            lines.append("    with pytest.raises(Exception):")
-            lines.append(f"        target_module.{function_name}({args})")
-        else:
-            lines.append(f"    result = target_module.{function_name}({args})")
-            lines.append("    assert result is not None")
-
+        call_arguments = build_call_arguments(tc["inputs"])
+        append_test_body(lines, function_name, call_arguments, tc)
         lines.append("")
 
     return "\n".join(lines)
