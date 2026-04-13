@@ -90,6 +90,9 @@ def _repair_test_case(test_case: dict[str, Any], target_function) -> bool:
     previous_behavior = test_case.get("expected_behavior")
     previous_return = test_case.get("expected_return")
     previous_exception = test_case.get("expected_exception")
+    actual_behavior: str
+    actual_return: Any
+    actual_exception: str | None
 
     try:
         result = target_function(**inputs)
@@ -213,6 +216,9 @@ def _repair_state_step(step: dict[str, Any], instance, state_attribute: str) -> 
     previous_return = step.get("expected_return")
     previous_exception = step.get("expected_exception")
     previous_state = step.get("expected_state")
+    actual_behavior: str
+    actual_return: Any
+    actual_exception: str | None
 
     try:
         result = target_method(**step_args)

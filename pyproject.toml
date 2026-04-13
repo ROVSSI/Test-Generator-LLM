@@ -1,0 +1,34 @@
+[project]
+name = "test-generator-llm"
+version = "0.1.0"
+description = "LLM-assisted Python test generation with category partition, MC/DC, state-based testing, and execution-based validation."
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+
+[tool.ruff.lint.per-file-ignores]
+"testgen.py" = ["E402"]
+"tests/*.py" = ["E402"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["src", "testgen.py"]
+ignore_missing_imports = true
+warn_unused_configs = true
+
+[tool.coverage.run]
+branch = true
+source = ["src", "testgen"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+fail_under = 75
+show_missing = true
+skip_covered = false
+omit = ["tests/*"]

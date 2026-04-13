@@ -39,3 +39,19 @@ Supported methods:
 - `category_partition`
 - `mcdc`
 - `state_based`
+
+## Quality Checks
+
+Local quality commands:
+
+```bash
+python -m ruff check src testgen.py tests/test_llm_generators.py tests/test_llm_validation.py
+python -m mypy
+python -m coverage run -m pytest -q
+python -m coverage report
+python -m coverage xml
+cyclonedx-py requirements requirements.txt --pyproject pyproject.toml --output-format JSON --output-file sbom.json
+```
+
+The GitHub Actions workflow runs linting, type checking, tests with coverage,
+and generates a CycloneDX SBOM artifact on every push and pull request.

@@ -9,7 +9,6 @@ sys.path.append(SRC_DIR)
 
 from llm_json_utils import extract_json
 from llm_mcdc_generator import generate_pytest_from_mcdc
-from llm_state_generator import generate_pytest_from_state
 from llm_test_generator import generate_pytest_from_cp
 import testgen
 from testgen import main

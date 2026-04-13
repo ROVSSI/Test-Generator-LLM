@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Lint source
+        run: python -m ruff check src testgen.py tests/test_llm_generators.py tests/test_llm_validation.py
+
+      - name: Type-check source
+        run: python -m mypy
+
+      - name: Run tests with coverage
+        run: |
+          python -m coverage run -m pytest -q
+          python -m coverage report
+          python -m coverage xml
+
+      - name: Generate SBOM
+        run: |
+          cyclonedx-py requirements requirements.txt --pyproject pyproject.toml --output-format JSON --output-file sbom.json
+
+      - name: Upload quality artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-artifacts
+          path: |
+            coverage.xml
+            sbom.json
