@@ -17,8 +17,11 @@ def build_module_loader_lines(source_file: str) -> list[str]:
     ]
 
 
-def build_call_arguments(inputs: dict[str, Any]) -> str:
-    if not isinstance(inputs, dict) or not inputs:
+def build_call_arguments(inputs: dict[str, Any], *, allow_empty: bool = False) -> str:
+    if not isinstance(inputs, dict):
+        raise ValueError("Arguments must be defined as an object.")
+
+    if not inputs and not allow_empty:
         raise ValueError("Each test case must define a non-empty 'inputs' object.")
 
     return ", ".join(f"{name}={value!r}" for name, value in inputs.items())
@@ -40,7 +43,7 @@ def append_test_body(lines: list[str], function_name: str, call_arguments: str, 
 
     if expected_behavior == "exception":
         exception_name = test_case.get("expected_exception") or "Exception"
-        lines.append(f"    with pytest.raises({_build_exception_reference(exception_name)}):")
+        lines.append(f"    with pytest.raises({build_exception_reference(exception_name)}):")
         lines.append(f"        target_module.{function_name}({call_arguments})")
         return
 
@@ -63,7 +66,7 @@ def _sanitize_identifier(value: str) -> str:
     return sanitized or "generated"
 
 
-def _build_exception_reference(exception_name: str) -> str:
+def build_exception_reference(exception_name: str) -> str:
     if not isinstance(exception_name, str) or not exception_name:
         return "Exception"
 

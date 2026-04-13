@@ -9,9 +9,10 @@ SRC_DIR = os.path.join(PROJECT_ROOT, "src")
 sys.path.append(SRC_DIR)
 
 from llm_client import call_llm
-from llm_prompts import CATEGORY_PARTITION_PROMPT, MCDC_PROMPT
+from llm_prompts import CATEGORY_PARTITION_PROMPT, MCDC_PROMPT, STATE_BASED_PROMPT
 from llm_json_utils import extract_json
 from llm_mcdc_generator import render_pytest_from_mcdc
+from llm_state_generator import render_pytest_from_state
 from llm_test_generator import render_pytest_from_cp
 from llm_validation import format_validation_summary, validate_test_spec
 
@@ -25,7 +26,7 @@ def main() -> int:
     llm_parser = sub.add_parser("llm", help="LLM-based test generation")
     llm_parser.add_argument(
         "--method",
-        choices=["category_partition", "mcdc"],
+        choices=["category_partition", "mcdc", "state_based"],
         required=True,
         help="Testing strategy to apply"
     )
@@ -75,6 +76,20 @@ def main() -> int:
                 validated_spec, validation_summary = validate_test_spec(test_spec, args.filepath)
                 test_code = render_pytest_from_mcdc(validated_spec, source_file)
                 out_file = "test_llm_mcdc.py"
+
+            # ------------------------------
+            # STATE-BASED TESTING
+            # ------------------------------
+            elif args.method == "state_based":
+                print("[INFO] Calling LLM with State-Based Testing prompt...")
+                prompt = STATE_BASED_PROMPT.format(
+                    function_code=function_code
+                )
+                llm_output = call_llm(prompt)
+                test_spec = extract_json(llm_output)
+                validated_spec, validation_summary = validate_test_spec(test_spec, args.filepath)
+                test_code = render_pytest_from_state(validated_spec, source_file)
+                out_file = "test_llm_state_based.py"
 
             # Write output
             tests_dir = os.path.join(PROJECT_ROOT, "tests")

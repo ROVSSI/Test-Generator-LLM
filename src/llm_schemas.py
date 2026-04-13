@@ -44,3 +44,34 @@ MCDC_SCHEMA = {
         }
     ]
 }
+
+STATE_BASED_SCHEMA = {
+    "class_name": "ClassName",
+    "state_attribute": "state",
+    "states": ["state1", "state2"],
+    "transitions": [
+        {
+            "from": "state1",
+            "action": "method_name",
+            "to": "state2"
+        }
+    ],
+    "test_cases": [
+        {
+            "id": "TC1",
+            "description": "what sequence this test checks",
+            "constructor_args": {},
+            "expected_initial_state": "state1",
+            "steps": [
+                {
+                    "action": "method_name",
+                    "args": {},
+                    "expected_behavior": "normal | exception",
+                    "expected_return": "exact return value or null",
+                    "expected_exception": "ValueError or null",
+                    "expected_state": "state after the action"
+                }
+            ]
+        }
+    ]
+}

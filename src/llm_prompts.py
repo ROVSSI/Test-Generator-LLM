@@ -78,3 +78,57 @@ Function under test:
 -------------------
 {function_code}
 """
+
+STATE_BASED_PROMPT = """
+You are a software testing expert.
+
+Apply STATE-BASED TESTING to the Python class below.
+
+IMPORTANT RULES:
+- Output ONLY raw JSON.
+- Do NOT include explanations.
+- Do NOT use markdown.
+- Do NOT include backticks.
+- Focus on object states and transitions caused by method calls.
+- Assume one fresh object instance is created per test case.
+- Use the class attribute that stores the state in `state_attribute`.
+- For each step, include the exact expected return value or exact expected exception class name.
+- For each step, include the expected state after the action completes.
+
+Return JSON in exactly this format:
+
+{{
+  "class_name": "ClassName",
+  "state_attribute": "state",
+  "states": ["state1", "state2"],
+  "transitions": [
+    {{
+      "from": "state1",
+      "action": "method_name",
+      "to": "state2"
+    }}
+  ],
+  "test_cases": [
+    {{
+      "id": "TC1",
+      "description": "short explanation",
+      "constructor_args": {{}},
+      "expected_initial_state": "state1",
+      "steps": [
+        {{
+          "action": "method_name",
+          "args": {{}},
+          "expected_behavior": "normal | exception",
+          "expected_return": "exact return value or null",
+          "expected_exception": "ValueError or null",
+          "expected_state": "state after the action"
+        }}
+      ]
+    }}
+  ]
+}}
+
+Class under test:
+-----------------
+{function_code}
+"""
