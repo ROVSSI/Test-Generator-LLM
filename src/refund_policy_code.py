@@ -1,3 +1,5 @@
+"""Example function target used to demo and validate the test generator."""
+
 def assess_refund_request(
     order_total,
     days_since_purchase,

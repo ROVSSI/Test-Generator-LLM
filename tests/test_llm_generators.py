@@ -46,7 +46,7 @@ def test_generate_pytest_from_cp_uses_keyword_args_and_exact_assertions():
     }
     """
 
-    output = generate_pytest_from_cp(json_text, "complex_code.py")
+    output = generate_pytest_from_cp(json_text, "refund_policy_code.py")
 
     assert "target_module.authorize(user_role='user', is_active=True, has_2fa=True)" in output
     assert "assert result == True" in output
@@ -89,7 +89,7 @@ def test_generate_pytest_from_mcdc_makes_duplicate_ids_unique():
     }
     """
 
-    output = generate_pytest_from_mcdc(json_text, "complex_code.py")
+    output = generate_pytest_from_mcdc(json_text, "order_routing_code.py")
 
     assert "def test_authorize_tc1():" in output
     assert "def test_authorize_tc1_2():" in output
@@ -166,24 +166,24 @@ def test_main_repairs_invalid_llm_expectations_before_writing_pytest(monkeypatch
 def test_main_writes_repaired_state_based_pytest(monkeypatch, capsys, tmp_path):
     llm_output = json.dumps(
         {
-            "class_name": "Turnstile",
+            "class_name": "RefundCase",
             "state_attribute": "state",
-            "states": ["locked", "unlocked", "alarm"],
+            "states": ["draft", "submitted", "under_review", "approved", "rejected", "closed"],
             "transitions": [],
             "test_cases": [
                 {
                     "id": "TC1",
-                    "description": "bad push expectation",
+                    "description": "bad submit expectation",
                     "constructor_args": {},
-                    "expected_initial_state": "locked",
+                    "expected_initial_state": "draft",
                     "steps": [
                         {
-                            "action": "push",
+                            "action": "submit",
                             "args": {},
                             "expected_behavior": "normal",
-                            "expected_return": "passed",
+                            "expected_return": "approved",
                             "expected_exception": None,
-                            "expected_state": "locked",
+                            "expected_state": "approved",
                         }
                     ],
                 }
@@ -203,7 +203,7 @@ def test_main_writes_repaired_state_based_pytest(monkeypatch, capsys, tmp_path):
             "llm",
             "--method",
             "state_based",
-            os.path.join(ROOT_DIR, "src", "turnstile_code.py"),
+            os.path.join(ROOT_DIR, "src", "refund_case_code.py"),
         ],
     )
 
@@ -214,5 +214,5 @@ def test_main_writes_repaired_state_based_pytest(monkeypatch, capsys, tmp_path):
 
     assert exit_code == 0
     assert "1 repaired" in captured.out
-    assert "assert result == 'alarm'" in generated
-    assert "assert obj.state == 'alarm'" in generated
+    assert "assert result == 'submitted'" in generated
+    assert "assert obj.state == 'submitted'" in generated

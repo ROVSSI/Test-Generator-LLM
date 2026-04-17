@@ -1,3 +1,5 @@
+"""Example function target used to demo and validate the test generator."""
+
 def route_order(order_total, customer_tier, is_express, has_coupon, destination):
     """Classify how an order should be handled.
 

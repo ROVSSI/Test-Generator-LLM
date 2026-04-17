@@ -25,10 +25,20 @@ warn_unused_configs = true
 [tool.coverage.run]
 branch = true
 source = ["src", "testgen"]
-omit = ["tests/*"]
+omit = [
+    "tests/*",
+    "src/order_routing_code.py",
+    "src/refund_case_code.py",
+    "src/refund_policy_code.py",
+]
 
 [tool.coverage.report]
 fail_under = 75
 show_missing = true
 skip_covered = false
-omit = ["tests/*"]
+omit = [
+    "tests/*",
+    "src/order_routing_code.py",
+    "src/refund_case_code.py",
+    "src/refund_policy_code.py",
+]

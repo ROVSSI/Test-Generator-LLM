@@ -1,3 +1,5 @@
+"""Example stateful class target used to demo and validate the test generator."""
+
 class RefundCase:
     """Simple workflow class for state-based testing demos."""
 
